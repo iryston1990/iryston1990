@@ -28,3 +28,5 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- The whole news site lives in `src/routes/index.tsx` with news/profiles tables in Lovable Cloud; owner rights come from `public.is_site_owner()` used in RLS, since the page mirrors a single-page original.
