@@ -8,6 +8,13 @@
       "when": 1793986063578,
       "tag": "0000_create_news_and_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793986870572,
+      "tag": "0001_owner_publishes_directly",
+      "breakpoints": true
     }
   ]
 }

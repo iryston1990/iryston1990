@@ -72,8 +72,10 @@ async function fetchNews(status: "approved" | "pending"): Promise<NewsItem[]> {
   return (data ?? []) as NewsItem[];
 }
 
-async function createNews(title: string, body: string) {
-  const { error } = await supabase.from("news").insert({ title, body });
+async function createNews(title: string, body: string, publish: boolean) {
+  const { error } = await supabase
+    .from("news")
+    .insert(publish ? { title, body, status: "approved" } : { title, body });
   if (error) throw new Error("create failed");
 }
 
@@ -467,7 +469,7 @@ function AuthModal(props: {
   );
 }
 
-function AddNewsModal(props: { onClose: () => void; onSubmitted: () => void }) {
+function AddNewsModal(props: { isOwner: boolean; onClose: () => void; onSubmitted: () => void }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
@@ -484,7 +486,7 @@ function AddNewsModal(props: { onClose: () => void; onSubmitted: () => void }) {
     setError(null);
     setBusy(true);
     try {
-      await createNews(t, b);
+      await createNews(t, b, props.isOwner);
       props.onSubmitted();
     } catch {
       setError("Не удалось отправить новость. Попробуйте ещё раз");
@@ -496,7 +498,7 @@ function AddNewsModal(props: { onClose: () => void; onSubmitted: () => void }) {
     <Modal title="Хабӕрттӕ бахӕсс" onClose={props.onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block space-y-1.5">
-          <span className="text-sm font-medium text-ink-soft">Сæр</span>
+          <span className="text-sm font-medium text-ink-soft">Сӕр</span>
           <input
             type="text"
             required
@@ -698,9 +700,11 @@ function Index() {
       )}
       {addOpen && (
         <AddNewsModal
+          isOwner={isOwner}
           onClose={() => setAddOpen(false)}
           onSubmitted={() => {
             setAddOpen(false);
+            refresh();
             setNotice("Хабар фидар кӕнын цӕуы");
           }}
         />
