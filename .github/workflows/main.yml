@@ -20,6 +20,8 @@ jobs:
         run: |
           npm install --legacy-peer-deps
           npm run build
+          # Проверим, какие папки создались, чтобы точно знать имя
+          ls -la
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -37,9 +39,22 @@ jobs:
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
           
-          # Принудительно создаём пустую папку android с указанием на правильный каталог веб-ресурсов build
-          npx cap init "Iryston" "com.iryston1990.irys" --web-dir=build
-          npx cap add android
+          # Определяем, какая папка сборки реально существует
+          WEB_DIR="dist"
+          if [ -d "build" ]; then WEB_DIR="build"; fi
+          if [ -d "public" ]; then WEB_DIR="public"; fi
+          if [ -d ".lovable" ]; then WEB_DIR=".lovable"; fi
+          
+          echo "Используем веб-директорию: $WEB_DIR"
+          
+          if [ ! -d "android" ]; then
+            npx cap init "Iryston" "com.iryston1990.irys" --web-dir=$WEB_DIR
+            npx cap add android
+          else
+            # Если папка уже есть, просто обновим путь в конфиге
+            echo "{\"appId\":\"com.iryston1990.irys\",\"appName\":\"Iryston\",\"webDir\":\"$WEB_DIR\"}" > capacitor.config.json
+          fi
+          
           npx cap sync android
 
       - name: Build APK via Gradle
