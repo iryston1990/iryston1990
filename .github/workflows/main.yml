@@ -14,11 +14,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Dependencies & Build Web Code
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Set up Java
@@ -35,7 +35,7 @@ jobs:
 
       - name: Install Capacitor & Convert to Android
         run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
           if [ ! -d "android" ]; then
             npx cap init "Iryston" "com.iryston1990.irys" --web-dir=dist
             npx cap add android
@@ -54,3 +54,4 @@ jobs:
         with:
           name: app-release-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          
