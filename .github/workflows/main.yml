@@ -36,11 +36,17 @@ jobs:
       - name: Install Capacitor & Convert to Android
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
+          
+          # Если папки android нет, создаем её и указываем папку build вместо dist
           if [ ! -d "android" ]; then
-            npx cap init "Iryston" "com.iryston1990.irys" --web-dir=dist
+            if [ -d "build" ]; then
+              npx cap init "Iryston" "com.iryston1990.irys" --web-dir=build
+            else
+              npx cap init "Iryston" "com.iryston1990.irys" --web-dir=dist
+            fi
             npx cap add android
           fi
-          npx cap static
+          
           npx cap sync android
 
       - name: Build APK via Gradle
@@ -54,4 +60,3 @@ jobs:
         with:
           name: app-release-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          
