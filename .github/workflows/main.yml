@@ -20,8 +20,6 @@ jobs:
         run: |
           npm install --legacy-peer-deps
           npm run build
-          # Проверим, какие папки создались, чтобы точно знать имя
-          ls -la
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -39,21 +37,27 @@ jobs:
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android --legacy-peer-deps
           
-          # Определяем, какая папка сборки реально существует
+          # Определяем папку сборки
           WEB_DIR="dist"
           if [ -d "build" ]; then WEB_DIR="build"; fi
           if [ -d "public" ]; then WEB_DIR="public"; fi
           if [ -d ".lovable" ]; then WEB_DIR=".lovable"; fi
           
-          echo "Используем веб-директорию: $WEB_DIR"
+          # Фикс для Lovable: если в папке нет index.html, копируем его из корня
+          if [ ! -f "$WEB_DIR/index.html" ]; then
+            cp index.html $WEB_DIR/ 2>/dev/null || cp public/index.html $WEB_DIR/ 2>/dev/null || true
+          fi
           
           if [ ! -d "android" ]; then
             npx cap init "Iryston" "com.iryston1990.irys" --web-dir=$WEB_DIR
             npx cap add android
           else
-            # Если папка уже есть, просто обновим путь в конфиге
             echo "{\"appId\":\"com.iryston1990.irys\",\"appName\":\"Iryston\",\"webDir\":\"$WEB_DIR\"}" > capacitor.config.json
           fi
+          
+          # Создаем пустой файл плагинов, чтобы Gradle не ругался на его отсутствие
+          mkdir -p android/app/src/main/assets
+          echo "{}" > android/app/src/main/assets/capacitor.plugins.json
           
           npx cap sync android
 
@@ -67,4 +71,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk          
